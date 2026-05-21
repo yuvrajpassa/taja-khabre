@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ताज़ा खबरें | Hindi News</title>
+
+  <meta name="description" content="ताज़ा खबरें - हिंदी की ताज़ा और भरोसेमंद न्यूज़ वेबसाइट">
+  <meta name="keywords" content="Hindi News, Breaking News, India News">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:'Poppins',sans-serif;
+      background:#f4f4f4;
+    }
+
+    header{
+      background:#d32f2f;
+      color:white;
+      padding:20px;
+      text-align:center;
+    }
+
+    nav{
+      background:#b71c1c;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      padding:12px;
+    }
+
+    nav a{
+      color:white;
+      text-decoration:none;
+      margin:5px 12px;
+      font-weight:bold;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:auto;
+      padding:15px;
+    }
+
+    .breaking{
+      background:#ffebee;
+      border-left:5px solid #d32f2f;
+      padding:12px;
+      margin-bottom:15px;
+      font-weight:bold;
+      border-radius:5px;
+    }
+
+    .card{
+      background:white;
+      border-radius:10px;
+      overflow:hidden;
+      margin-bottom:20px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .card img{
+      width:100%;
+      height:250px;
+      object-fit:cover;
+    }
+
+    .card-content{
+      padding:15px;
+    }
+
+    .card h2{
+      margin-bottom:10px;
+      color:#d32f2f;
+    }
+
+    .card p{
+      line-height:1.6;
+      color:#333;
+    }
+
+    .btn{
+      display:inline-block;
+      margin-top:10px;
+      background:#d32f2f;
+      color:white;
+      padding:8px 14px;
+      text-decoration:none;
+      border-radius:5px;
+    }
+
+    .ad-box{
+      background:white;
+      text-align:center;
+      padding:20px;
+      border-radius:10px;
+      margin-bottom:20px;
+      font-weight:bold;
+    }
+
+    footer{
+      background:#333;
+      color:white;
+      text-align:center;
+      padding:15px;
+      margin-top:20px;
+    }
+
+    .dark{
+      background:#121212;
+      color:white;
+    }
+
+    .dark .card,
+    .dark .ad-box{
+      background:#1e1e1e;
+      color:white;
+    }
+
+    .dark .card p{
+      color:#ddd;
+    }
+
+    @media(max-width:768px){
+      .card img{
+        height:200px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📰 ताज़ा खबरें</h1>
+  <p>सच्ची • तेज़ • भरोसेमंद हिंदी न्यूज़</p>
+
+  <br>
+
+  <button onclick="toggleDark()" class="btn">🌙 Dark Mode</button>
+</header>
+
+<nav>
+  <a href="#">होम</a>
+  <a href="#">राजनीति</a>
+  <a href="#">खेल</a>
+  <a href="#">टेक</a>
+  <a href="#">मनोरंजन</a>
+  <a href="#">About</a>
+  <a href="#">Contact</a>
+</nav>
+
+<div class="container">
+
+  <div class="breaking" id="breakingNews">
+    🔥 Breaking News Loading...
+  </div>
+
+  <div class="ad-box">
+    Advertisement Space
+  </div>
+
+  <div id="newsList"></div>
+
+</div>
+
+<footer>
+  <p>© 2026 ताज़ा खबरें | All Rights Reserved</p>
+</footer>
+
+<script>
+
+function toggleDark(){
+  document.body.classList.toggle("dark");
+}
+
+const API_KEY = "8edc1bc61658cccb8b649b99463f219e";
+
+const API_URL =
+"https://gnews.io/api/v4/top-headlines?lang=hi&country=in&max=20&apikey=" + API_KEY;
+
+async function loadNews(){
+
+  try{
+
+    const response = await fetch(API_URL);
+
+    const data = await response.json();
+
+    const oldNews = JSON.parse(localStorage.getItem("news") || "[]");
+
+    data.articles.forEach(item => {
+
+      const exists = oldNews.some(n => n.title === item.title);
+
+      if(!exists){
+
+        oldNews.unshift({
+          title: item.title,
+          desc: item.description || "No Description",
+          img: item.image || "https://via.placeholder.com/800x400",
+          url: item.url
+        });
+      }
+
+    });
+
+    localStorage.setItem("news", JSON.stringify(oldNews));
+
+    document.getElementById("breakingNews").innerHTML =
+      "🔥 Breaking: " + data.articles[0].title;
+
+    renderNews();
+
+  }
+  catch(error){
+    console.log("News load nahi ho pa rahi");
+  }
+}
+
+function renderNews(){
+
+  const list = document.getElementById("newsList");
+
+  list.innerHTML = "";
+
+  const news = JSON.parse(localStorage.getItem("news") || "[]");
+
+  news.forEach(n => {
+
+    const div = document.createElement("div");
+
+    div.className = "card";
+
+    div.innerHTML = `
+
+      <img src="${n.img}">
+
+      <div class="card-content">
+        <h2>${n.title}</h2>
+        <p>${n.desc}</p>
+
+        <a href="${n.url}" target="_blank" class="btn">
+          पूरी खबर पढ़ें
+        </a>
+      </div>
+
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+loadNews();
+
+setInterval(loadNews, 600000);
+
+</script>
+
+</body>
+</html>
